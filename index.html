@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sega Mega Drive Catalog</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #121214;
+            color: #e1e1e6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #00e676;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            background-color: #202024;
+            border: 2px solid #29292e;
+            border-radius: 8px;
+            color: #ffffff;
+            margin-bottom: 24px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: #00e676;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .game-card {
+            background-color: #202024;
+            border: 1px solid #29292e;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: #00e676;
+        }
+
+        .game-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #18181b;
+        }
+
+        .game-details {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .game-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #f4f4f5;
+            line-height: 1.3;
+        }
+
+        .play-btn {
+            display: block;
+            text-align: center;
+            background-color: #00e676;
+            color: #000000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .play-btn:hover {
+            background-color: #00c853;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #8d8d99;
+            grid-column: 1 / -1;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sega Mega Drive Catalog</h1>
+    <input type="text" id="searchInput" class="search-box" placeholder="Поиск игры...">
+    <div class="game-grid" id="gameGrid"></div>
+</div>
+
+<script>
+    const games = [
+        { name: "001 Haunted house2", file: "001 Haunted house2.bin", img: "covers/001-haunted-house2.jpg" },
+        { name: "002 Haunted house3", file: "002 Haunted house3.bin", img: "covers/002-haunted-house3.jpg" },
+        { name: "003 Flying BatZERO", file: "003 Flying BatZERO.bin", img: "covers/003-flying-batzero.jpg" },
+        { name: "004 Flying Bat Boy", file: "004 Flying Bat Boy.bin", img: "covers/004-flying-bat-boy.jpg" },
+        { name: "005 Flying Bat 2", file: "005 Flying Bat 2.bin", img: "covers/005-flying-bat-2.jpg" },
+        { name: "007 Doom", file: "007 Doom.bin", img: "covers/007-doom.jpg" },
+        { name: "008 karate", file: "008 karate.bin", img: "covers/008-karate.jpg" },
+        { name: "009 Descendants of the Dragon-Legend", file: "009 Descendants of the Dragon-Legend ...bin", img: "covers/009-descendants-dragon.jpg" },
+        { name: "010 Devil Buster", file: "010 Devil Buster.bin", img: "covers/010-devil-buster.jpg" },
+        { name: "011 Cat and Mouse (Simpson Edition)", file: "011 Cat and Mouse (Simpson Edition)).bin", img: "covers/011-cat-mouse.jpg" },
+        { name: "013 Magic bubbles", file: "013 Magic bubbles.bin", img: "covers/013-magic-bubbles.jpg" },
+        { name: "014 Magic bubbles2", file: "014 Magic bubbles2.bin", img: "covers/014-magic-bubbles2.jpg" },
+        { name: "015 Magic Bubble Gaiden", file: "015 Magic Bubble Gaiden.bin", img: "covers/015-magic-bubble-gaiden.jpg" },
+        { name: "018 Death pinball MD", file: "018 Death pinball MD.bin", img: "covers/018-death-pinball-md.jpg" },
+        { name: "019 The winged warrior", file: "019 The winged warrior.bin", img: "covers/019-winged-warrior.jpg" },
+        { name: "020 Deadly killer1", file: "020 Deadly killer1.bin", img: "covers/020-deadly-killer1.jpg" },
+        { name: "021 Deadly killer2", file: "021 Deadly killer2.bin", img: "covers/021-deadly-killer2.jpg" },
+        { name: "022 92Barcelona Olympics", file: "022 92Barcelona Olympics.bin", img: "covers/022-92barcelona.jpg" },
+        { name: "023 96Atlanta Summer Olympics", file: "023 96Atlanta Summer Olympics.bin", img: "covers/023-96atlanta.jpg" },
+        { name: "024 Egg Adventure", file: "024 Egg Adventure.bin", img: "covers/024-egg-adventure.jpg" },
+        { name: "025 BB bird and big wild wolf", file: "025 BB bird and big wild wolf.bin", img: "covers/025-bb-bird.jpg" },
+        { name: "026 DJ BOY", file: "026 DJ BOY.bin", img: "covers/026-dj-boy.jpg" },
+        { name: "027 EL Wient", file: "027 EL Wient.bin", img: "covers/027-el-wient.jpg" },
+        { name: "029 EX birdman fighter", file: "029 EX birdman fighter.bin", img: "covers/029-ex-birdman.jpg" },
+        { name: "030 F15 Operation Falcon", file: "030 F15 Operation Falcon.bin", img: "covers/030-f15-falcon.jpg" },
+        { name: "031 F1World Championships", file: "031 F1World Championships.bin", img: "covers/031-f1-world.jpg" },
+        { name: "032 F1car", file: "032 F1car.bin", img: "covers/032-f1car.jpg" },
+        { name: "037 Legend of JUJU-Furious", file: "037 Legend of JUJU-Furious.bin", img: "covers/037-legend-juju.jpg" },
+        { name: "038 M1 Abrams main battle tank", file: "038 M1 Abrams main battle tank.bin", img: "covers/038-m1-abrams.jpg" },
+        { name: "039 NBA Bulls vs Lakers", file: "039 NBA Bulls vs Lakers.bin", img: "covers/039-nba-bulls-lakers.jpg" },
+        { name: "040 NBA Basketball 98", file: "040 NBA Basketball 98.bin", img: "covers/040-nba-98.jpg" },
+        { name: "044 Q version of super beautiful girl", file: "044 Q version of super beautiful girl.bin", img: "covers/044-q-version-girl.jpg" },
+        { name: "046 Tecmo Super Cricket Final Edition 3", file: "046 Tecmo Super Cricket Final Edition 3.b....bin", img: "covers/046-tecmo-cricket.jpg" },
+        { name: "049 The Adventures of Tintin", file: "049 The Adventures of Tintin.bin", img: "covers/049-tintin.jpg" },
+        { name: "052 World hero", file: "052 World hero.bin", img: "covers/052-world-hero.jpg" },
+        { name: "053 Jungle attack", file: "053 Jungle attack.bin", img: "covers/053-jungle-attack.jpg" },
+        { name: "054 Two fools", file: "054 Two fools.bin", img: "covers/054-two-fools.jpg" },
+        { name: "055 Theme park", file: "055 theme park.bin", img: "covers/055-theme-park.jpg" },
+        { name: "056 Syndicate", file: "056 Syndicate.bin", img: "covers/056-syndicate.jpg" },
+        { name: "057 Light power2", file: "057 Light power2.bin", img: "covers/057-light-power2.jpg" },
+        { name: "058 Adventure world4", file: "058 Adventure world4.bin", img: "covers/058-adventure-world4.jpg" },
+        { name: "059 Creation Warrior", file: "059 Creation Warrior.bin", img: "covers/059-creation-warrior.jpg" },
+        { name: "060 Cutthroat Island", file: "060 Cutthroat Island.bin", img: "covers/060-cutthroat-island.jpg" },
+        { name: "062 Action 52 in 1", file: "062 Action 52 in 1.bin", img: "covers/062-action-52.jpg" },
+        { name: "063 Action NBA", file: "063 Action NBA.bin", img: "covers/063-action-nba.jpg" },
+        { name: "064 Animal Kombat", file: "064 Animal Kombat.bin", img: "covers/064-animal-kombat.jpg" },
+        { name: "066 Harry Potter", file: "066 Harry Potter.bin", img: "covers/066-harry-potter.jpg" },
+        { name: "067 The nightmare circus", file: "067 The nightmare circus.bin", img: "covers/067-nightmare-circus.jpg" },
+        { name: "068 Alien Double Silly 2", file: "068 Alien Double Silly 2.bin", img: "covers/068-alien-double-silly2.jpg" },
+        { name: "069 Alien prince", file: "069 Alien prince.bin", img: "covers/069-alien-prince.jpg" },
+        { name: "070 Big head boy", file: "070 Big head boy.bin", img: "covers/070-big-head-boy.jpg" },
+        { name: "071 Tecmo Football World Cup93", file: "071 Tecmo Football World Cup93.bin", img: "covers/071-tecmo-football93.jpg" },
+        { name: "072 Bunny Bunny-Crisis", file: "072 Bunny Bunny-Crisis.bin", img: "covers/072-bunny-crisis.jpg" },
+        { name: "073 Little Witch Cotton", file: "073 Little Witch Cotton.bin", img: "covers/073-witch-cotton.jpg" },
+        { name: "074 Cui Di and the big dumb cat", file: "074 Cui Di and the big dumb cat.bin", img: "covers/074-cui-di.jpg" },
+        { name: "076 A forest of demons", file: "076 A forest of demons.bin", img: "covers/076-forest-demons.jpg" },
+        { name: "077 Pinball", file: "077 Pinball.bin", img: "covers/077-pinball.jpg" },
+        { name: "078 Ninja Trio", file: "078 Ninja Trio.bin", img: "covers/078-ninja-trio.jpg" },
+        { name: "079 Devil with Lion", file: "079 Devil with Lion.bin", img: "covers/079-devil-lion.jpg" },
+        { name: "080 Skeleton Fighter", file: "080 Skeleton Fighter.bin", img: "covers/080-skeleton-fighter.jpg" },
+        { name: "083 Dark Stalker", file: "083 Dark Stalker.bin", img: "covers/083-dark-stalker.jpg" },
+        { name: "084 Mummy hockey", file: "084 Mummy hockey.bin", img: "covers/084-mummy-hockey.jpg" },
+        { name: "085 Mecha Hegemony", file: "085 Mecha Hegemony.bin", img: "covers/085-mecha-hegemony.jpg" },
+        { name: "086 Game challenge 1", file: "086 Game challenge 1.bin", img: "covers/086-game-challenge1.jpg" },
+        { name: "087 Slam Dunk", file: "087 Slam Dunk.bin", img: "covers/087-slam-dunk.jpg" },
+        { name: "088 Martian Escaper", file: "088 Martian Escaper.bin", img: "covers/088-martian-escaper.jpg" },
+        { name: "089 Ball", file: "089 ball.bin", img: "covers/089-ball.jpg" },
+        { name: "090 Crazy Mickey Mouse", file: "090 Crazy Mickey Mouse.bin", img: "covers/090-crazy-mickey.jpg" },
+        { name: "091 Crazy Race (Q version)", file: "091 Crazy Race (Q version).bin", img: "covers/091-crazy-race.jpg" },
+        { name: "092 Real monster", file: "092 Real monster.bin", img: "covers/092-real-monster.jpg" },
+        { name: "093 True Lies (The Devil the Great)", file: "093 True Lies (The Devil the Great).bin", img: "covers/093-true-lies.jpg" },
+        { name: "094 Secret Magic Treasure", file: "094 Secret Magic Treasure.bin", img: "covers/094-secret-magic.jpg" },
+        { name: "095 Clay Warrior", file: "095 Clay Warrior.bin", img: "covers/095-clay-warrior.jpg" },
+        { name: "096 John Madden Rugby 98", file: "096 John Madden Rugby 98.bin", img: "covers/096-john-madden98.jpg" },
+        { name: "097 Sailor Moon", file: "097 Sailor Moon.bin", img: "covers/097-sailor-moon.jpg" },
+        { name: "097 Castlevania - Bloodlines", file: "097. Castlevania - Bloodlines.bin", img: "covers/097-castlevania.jpg" },
+        { name: "098 Timid mouse", file: "098 timid mouse.bin", img: "covers/098-timid-mouse.jpg" },
+        { name: "098 Rockman Megaworld", file: "098. Rockman Megaworld.bin", img: "covers/098-rockman-megaworld.jpg" },
+        { name: "099 Pulse Superman", file: "099 Pulse Superman.bin", img: "covers/099-pulse-superman.jpg" },
+        { name: "099 Sonic the Hedgehog 2", file: "099. Sonic the Hedgehog 2.bin", img: "covers/099-sonic2.jpg" },
+        { name: "100 Virtual Bart Simpson", file: "100 Virtual Bart Simpson.bin", img: "covers/100-virtual-bart.jpg" },
+        { name: "100 Mega Bomberman", file: "100. Mega Bomberman.bin", img: "covers/100-mega-bomberman.jpg" },
+        { name: "101 Crayon Shin-chan", file: "101 Crayon Shin-chan.bin", img: "covers/101-crayon-shin-chan.jpg" },
+        { name: "101 Sonic the Hedgehog", file: "101. Sonic the Hedgehog.bin", img: "covers/101-sonic1.jpg" },
+        { name: "102 Bloody shot", file: "102 Bloody shot.bin", img: "covers/102-bloody-shot.jpg" },
+        { name: "102 Rockman X3", file: "102. Rockman X3.bin", img: "covers/102-rockman-x3.jpg" },
+        { name: "104 Observation Point", file: "104 Observation Point.bin", img: "covers/104-observation-point.jpg" },
+        { name: "105 The chrononauts", file: "105 The chrononauts.bin", img: "covers/105-chrononauts.jpg" },
+        { name: "106 Super Donkey Kong 99", file: "106 Super Donkey Kong 99.bin", img: "covers/106-donkey-kong99.jpg" },
+        { name: "107 Mad dragon", file: "107 Mad dragon.bin", img: "covers/107-mad-dragon.jpg" },
+        { name: "109 Asterix-Big Rescue", file: "109 Asterix-Big Rescue.bin", img: "covers/109-asterix.jpg" },
+        { name: "110 Adams family", file: "110 Adams family.bin", img: "covers/110-addams-family.jpg" },
+        { name: "111 Trap-Mayan Adventure", file: "111 Trap-Mayan Adventure.bin", img: "covers/111-pitfall-mayan.jpg" },
+        { name: "112 Special Police Zero", file: "112 Special Police Zero.bin", img: "covers/112-special-police.jpg" },
+        { name: "114 Master of the Devil", file: "114 Master of the Devil.bin", img: "covers/114-master-devil.jpg" },
+        { name: "115 Rugby World Football 95", file: "115 Rugby World Football 95.bin", img: "covers/115-rugby-95.jpg" },
+        { name: "116 Blackwater Pirates", file: "116 Blackwater Pirates.bin", img: "covers/116-blackwater-pirates.jpg" },
+        { name: "117 Hedy kid", file: "117 Hedy kid.bin", img: "covers/117-hedy-kid.jpg" },
+        { name: "118 Warehouse Fan", file: "118 Warehouse Fan.bin", img: "covers/118-warehouse-fan.jpg" },
+        { name: "119 Chiki Chiki Boys", file: "119 Chiki Chiki Boys.bin", img: "covers/119-chiki-chiki-boys.jpg" },
+        { name: "120 Main view racing", file: "120 Main view racing.bin", img: "covers/120-main-view-racing.jpg" },
+        { name: "121 King Arthur", file: "121 King Arthur.bin", img: "covers/121-king-arthur.jpg" },
+        { name: "122 Desperado", file: "122 Desperado.bin", img: "covers/122-desperado.jpg" },
+        { name: "123 Ysukuni 3", file: "123 Ysukuni 3.bin", img: "covers/123-ysukuni-3.jpg" },
+        { name: "127 Light power 1", file: "127 Light power 1.bin", img: "covers/127-light-power1.jpg" },
+        { name: "128 Glorious Legend", file: "128 Glorious Legend.bin", img: "covers/128-glorious-legend.jpg" },
+        { name: "129 Bunny Adventures", file: "129 Bunny Adventures.bin", img: "covers/129-bunny-adventures.jpg" },
+        { name: "131 Adventure", file: "131 Adventure.bin", img: "covers/131-adventure.jpg" },
+        { name: "133 Power racing", file: "133 Power racing.bin", img: "covers/133-power-racing.jpg" },
+        { name: "134 Carl 50", file: "134 Carl 50.bin", img: "covers/134-carl-50.jpg" },
+        { name: "135 Indiana Jones", file: "135 Indiana Jones.bin", img: "covers/135-indiana-jones.jpg" },
+        { name: "136 Atomic Warrior", file: "136 Atomic Warrior.bin", img: "covers/136-atomic-warrior.jpg" },
+        { name: "137 Chameleon", file: "137 chameleon.bin", img: "covers/137-chameleon.jpg" },
+        { name: "138 Weird world", file: "138 Weird world.bin", img: "covers/138-weird-world.jpg" },
+        { name: "140 Jim Power-Arcade Game", file: "140 Jim Power-Arcade Game.bin", img: "covers/140-jim-power.jpg" },
+        { name: "141 Vengeance Blade", file: "141 Vengeance Blade.bin", img: "covers/141-vengeance-blade.jpg" },
+        { name: "142 Alien Double Silly", file: "142 Alien Double Silly.bin", img: "covers/142-alien-double-silly.jpg" },
+        { name: "143 Great Sea Roar-Rocket Rider", file: "143 Great Sea Roar-Rocket Rider.bin", img: "covers/143-great-sea-roar.jpg" },
+        { name: "144 Melee", file: "144 Melee.bin", img: "covers/144-melee.jpg" },
+        { name: "145 The Great Melee", file: "145 The Great Melee.bin", img: "covers/145-great-melee.jpg" },
+        { name: "147 Wiz n Liz", file: "147 Wiz n Liz.bin", img: "covers/147-wiz-n-liz.jpg" },
+        { name: "148 Space fighter", file: "148 Space fighter.bin", img: "covers/148-space-fighter.jpg" },
+        { name: "149 Taiko Risshiden", file: "149 Taiko Risshiden.bin", img: "covers/149-taiko-risshiden.jpg" },
+        { name: "150 The Lost Vikings", file: "150 The Lost Vikings.bin", img: "covers/150-lost-vikings.jpg" },
+        { name: "151 Strange Island", file: "151 Strange Island.bin", img: "covers/151-strange-island.jpg" },
+        { name: "152 The goddess was born", file: "152 The goddess was born.bin", img: "covers/152-goddess-born.jpg" },
+        { name: "153 Tiger Fighter", file: "153 Tiger Fighter.bin", img: "covers/153-tiger-fighter.jpg" },
+        { name: "154 Gradius", file: "154 Gradius.bin", img: "covers/154-gradius.jpg" },
+        { name: "155 The Super Dimension Fortress Macross", file: "155 The Super Dimension Fortress Macro...bin", img: "covers/155-macross.jpg" },
+        { name: "156 Master of the universe", file: "156 Master of the universe.bin", img: "covers/156-master-universe.jpg" },
+        { name: "157 Little Penguin", file: "157 Little Penguin.bin", img: "covers/157-little-penguin.jpg" },
+        { name: "158 Peter Pan", file: "158 Peter Pan.bin", img: "covers/158-peter-pan.jpg" },
+        { name: "159 Kawasaki", file: "159 Kawasaki.bin", img: "covers/159-kawasaki.jpg" },
+        { name: "161 Warriors of the other Gods", file: "161 Warriors of the other Gods.bin", img: "covers/161-warriors-other-gods.jpg" },
+        { name: "162 Micro machine 2", file: "162 Micro machine 2.bin", img: "covers/162-micro-machine-2.jpg" },
+        { name: "163 Micro machine 96", file: "163 Micro machine 96.bin", img: "covers/163-micro-machine-96.jpg" },
+        { name: "164 Ninja Gaiden", file: "164 Ninja Gaiden.bin", img: "covers/164-ninja-gaiden.jpg" },
+        { name: "166 Fighting primitives", file: "166 Fighting primitives.bin", img: "covers/166-fighting-primitives.jpg" },
+        { name: "167 Battle racing", file: "167 Battle racing.bin", img: "covers/167-battle-racing.jpg" },
+        { name: "168 Outdoor Drag Racing-2019 Future E", file: "168 Outdoor Drag Racing-2019 Future E...bin", img: "covers/168-outdoor-drag-racing.jpg" },
+        { name: "169 Outdoor Drag Racing", file: "169 Outdoor Drag Racing.bin", img: "covers/169-outdoor-drag-racing.jpg" },
+        { name: "170 Play baseball 4", file: "170 Play baseball 4.bin", img: "covers/170-play-baseball-4.jpg" },
+        { name: "171 Thomas Locomotive", file: "171 Thomas Locomotive.bin", img: "covers/171-thomas-locomotive.jpg" },
+        { name: "172 Boxing-New Legend King", file: "172 Boxing-New Legend King.bin", img: "covers/172-boxing-new-legend.jpg" },
+        { name: "173 Insect Catcher-18 banned aircraft", file: "173 Insect Catcher-18 banned aircraft.bin", img: "covers/173-insect-catcher.jpg" },
+        { name: "174 Bug Catcher", file: "174 Bug Catcher.bin", img: "covers/174-bug-catcher.jpg" },
+        { name: "175 Monaco GP racing II", file: "175 Monaco GP racing II.bin", img: "covers/175-monaco-gp-2.jpg" },
+        { name: "176 Star Trek-Far Space", file: "176 Star Trek-Far Space.bin", img: "covers/176-star-trek.jpg" },
+        { name: "178 Interstellar shooting", file: "178 Interstellar shooting.bin", img: "covers/178-interstellar-shooting.jpg" },
+        { name: "179 Star Lancer", file: "179 Star Lancer.bin", img: "covers/179-star-lancer.jpg" },
+        { name: "180 Interplanetary Management", file: "180 Interplanetary Management.bin", img: "covers/180-interplanetary-mgmt.jpg" },
+        { name: "181 Violent Nemesis", file: "181 Violent Nemesis.bin", img: "covers/181-violent-nemesis.jpg" },
+        { name: "182 Mummy American Football", file: "182 Mummy American Football.bin", img: "covers/182-mummy-football.jpg" },
+        { name: "183 Mecha Warrior", file: "183 Mecha Warrior.bin", img: "covers/183-mecha-warrior.jpg" },
+        { name: "184 Squirrel Battle", file: "184 Squirrel Battle.bin", img: "covers/184-squirrel-battle.jpg" },
+        { name: "185 Mr. Nutz", file: "185 Mr. Nutz.bin", img: "covers/185-mr-nutz.jpg" },
+        { name: "186 Goofy s Hysterical History Tour", file: "186 Goofy s Hysterical History Tour.bin", img: "covers/186-goofy-history.jpg" },
+        { name: "187 Chakan - The Forever Man", file: "187 Chakan - The Forever Man.bin", img: "covers/187-chakan.jpg" },
+        { name: "188 Valis 1", file: "188 Valis 1.bin", img: "covers/188-valis-1.jpg" },
+        { name: "189 Valis 3", file: "189 Valis 3.bin", img: "covers/189-valis-3.jpg" },
+        { name: "190 Rubber gun", file: "190 Rubber gun.bin", img: "covers/190-rubber-gun.jpg" },
+        { name: "191 Task Force Harrier EX", file: "191 Task Force Harrier EX.bin", img: "covers/191-task-force-harrier.jpg" },
+        { name: "192 Attack Helicopter", file: "192 Attack Helicopter.bin", img: "covers/192-attack-helicopter.jpg" },
+        { name: "194 Venom", file: "194 venom.bin", img: "covers/194-venom.jpg" },
+        { name: "195 Crystal Pony", file: "195 Crystal Pony.bin", img: "covers/195-crystal-pony.jpg" },
+        { name: "196 Sand Dune Castle 1", file: "196 Sand Dune Castle 1.bin", img: "covers/196-sand-dune-1.jpg" },
+        { name: "197 Sand Dune Castle 2", file: "197 Sand Dune Castle 2.bin", img: "covers/197-sand-dune-2.jpg" },
+        { name: "198 Exile", file: "198 Exile.bin", img: "covers/198-exile.jpg" },
+        { name: "199 Catastrophe", file: "199 catastrophe.bin", img: "covers/199-catastrophe.jpg" },
+        { name: "201 Island adventure", file: "201 Island adventure.bin", img: "covers/201-island-adventure.jpg" },
+        { name: "203 Chaotic locomotive", file: "203 Chaotic locomotive.bin", img: "covers/203-chaotic-locomotive.jpg" },
+        { name: "204 Flamingo", file: "204 Flamingo.bin", img: "covers/204-flamingo.jpg" },
+        { name: "205 Rocket Knight", file: "205 Rocket Knight.bin", img: "covers/205-rocket-knight.jpg" },
+        { name: "206 Cannon fodder rushes forward", file: "206 Cannon fodder rushes forward.bin", img: "covers/206-cannon-fodder.jpg" },
+        { name: "207 Wolf boy", file: "207 Wolf boy.bin", img: "covers/207-wolf-boy.jpg" },
+        { name: "A+ Street Fighter EX2 Plus", file: "A+ street fighter ex2 plus (europe).bin", img: "covers/a-plus-street-fighter-ex2.jpg" },
+        { name: "Air Combat Nemesis", file: "Air Combat Nemesis.bin", img: "covers/air-combat-nemesis.jpg" },
+        { name: "Alien 3 (Alt)", file: "Alien 3 (2).bin", img: "covers/alien-3-alt.jpg" },
+        { name: "Alien 3", file: "Alien 3.bin", img: "covers/alien-3.jpg" },
+        { name: "Alien Storm (Alt)", file: "Alien Storm .bin", img: "covers/alien-storm-alt.jpg" },
+        { name: "Alien Storm", file: "Alien Storm.bin", img: "covers/alien-storm.jpg" },
+        { name: "Alien War of Destruction Forces", file: "Alien war of destruction forces.bin", img: "covers/alien-war-destruction.jpg" },
+        { name: "Alien War", file: "Alien War.bin", img: "covers/alien-war.jpg" },
+        { name: "Alien Warriors", file: "Alien Warriors.bin", img: "covers/alien-warriors.jpg" },
+        { name: "Alien Soldier", file: "AlienSoldier .bin", img: "covers/alien-soldier.jpg" },
+        { name: "Annals of the Three Kingdoms 3", file: "Annals of the Three Kingdoms 3.bin", img: "covers/annals-three-kingdoms-3.jpg" },
+        { name: "Ant Rider", file: "Ant rider.bin", img: "covers/ant-rider.jpg" },
+        { name: "Avianwars", file: "Avianwars .bin", img: "covers/avianwars.jpg" },
+        { name: "Ayrton Senna's Super Monaco GP II", file: "Ayrton Senna_s Super Monaco GP II .bin", img: "covers/ayrton-senna-monaco-2.jpg" },
+        { name: "Batman Returns", file: "Batman Returns.bin", img: "covers/batman-returns.jpg" },
+        { name: "Batman", file: "Batman.bin", img: "covers/batman.jpg" },
+        { name: "Battle City (Alt)", file: "Battle City .bin", img: "covers/battle-city-alt.jpg" },
+        { name: "Battle City", file: "Battle City.bin", img: "covers/battle-city.jpg" },
+        { name: "Battle Formation", file: "Battle formation.bin", img: "covers/battle-formation.jpg" },
+        { name: "Battle Squadron ONE", file: "Battle Squadron ONE .bin", img: "covers/battle-squadron-one.jpg" },
+        { name: "Battle Squadron", file: "Battle Squadron.bin", img: "covers/battle-squadron.jpg" },
+        { name: "Battletoads - Double Dragon", file: "Battletoads - Double Dragon .bin", img: "covers/battletoads-double-dragon.jpg" },
+        { name: "Battletoads", file: "Battletoads.bin", img: "covers/battletoads.jpg" },
+        { name: "Battlezone", file: "Battlezone .bin", img: "covers/battlezone.jpg" },
+        { name: "Big Dipper Fist", file: "Big Dipper Fist.bin", img: "covers/big-dipper-fist.jpg" },
+        { name: "Big Tank", file: "Big Tank.bin", img: "covers/big-tank.jpg" },
+        { name: "Birdman", file: "Birdman.bin", img: "covers/birdman.jpg" },
+        { name: "Bomb Man", file: "Bomb Man.smd", img: "covers/bomb-man.jpg" },
+        { name: "Book of the Jungle", file: "Book of the jungle.bin", img: "covers/book-of-the-jungle.jpg" },
+        { name: "Bright Crusade", file: "Bright Crusade.smd", img: "covers/bright-crusade.jpg" },
+        { name: "Burning Force", file: "Burning Force.bin", img: "covers/burning-force.jpg" },
+        { name: "Captain Planet and the Planeteers", file: "Captain Planet and the Planeteers.bin", img: "covers/captain-planet.jpg" },
+        { name: "Cartoon Star", file: "Cartoon star.bin", img: "covers/cartoon-star.jpg" },
+        { name: "Castle of Dreams-Mitch House Adventure", file: "Castle of dreams-Mitch House adventure....bin", img: "covers/castle-of-dreams.jpg" },
+        { name: "Castle of Illusion Starring Mickey Mouse", file: "Castle of Illusion Starring Mickey Mouse....bin", img: "covers/castle-of-illusion.jpg" },
+        { name: "Chinese Chess (Alt)", file: "Chinese chess (2).bin", img: "covers/chinese-chess-alt.jpg" },
+        { name: "Chinese Chess", file: "Chinese chess.bin", img: "covers/chinese-chess.jpg" },
+        { name: "Chip 'n Dale- Rescue Rangers", file: "Chip _n Dale- Rescue Rangers .bin", img: "covers/chip-n-dale.jpg" },
+        { name: "Combat Formation", file: "Combat formation.bin", img: "covers/combat-formation.jpg" },
+        { name: "Commando (Alt)", file: "Commando .bin", img: "covers/commando-alt.jpg" },
+        { name: "Commando", file: "Commando.bin", img: "covers/commando.jpg" },
+        { name: "Contra-Jagged Corps", file: "Contra-Jagged Corps.bin", img: "covers/contra-jagged-corps.jpg" },
+        { name: "Crash Bandicoot", file: "Crash Bandicoot .smd", img: "covers/crash-bandicoot.jpg" },
+        { name: "Crue Ball - Heavy Metal Pinball", file: "Crue Ball - Heavy Metal Pinball .bin", img: "covers/crue-ball.jpg" },
+        { name: "Demolition Man (Alt)", file: "Demolition Man .bin", img: "covers/demolition-man-alt.jpg" },
+        { name: "Demolition Man", file: "Demolition Man.bin", img: "covers/demolition-man.jpg" },
+        { name: "Devilish", file: "Devilish.bin", img: "covers/devilish.jpg" },
+        { name: "DJ Boy", file: "DJ boy.bin", img: "covers/dj-boy.jpg" },
+        { name: "Double Dragon II The Revenge", file: "DOUBLE DRAGON II THE REVENGE.bin", img: "covers/double-dragon-2.jpg" },
+        { name: "Dreamstar II", file: "Dreamstar II.bin", img: "covers/dreamstar-2.jpg" },
+        { name: "Dune (Alt)", file: "Dune .bin", img: "covers/dune-alt.jpg" },
+        { name: "Dune", file: "Dune.bin", img: "covers/dune.jpg" },
+        { name: "Empty Teeth", file: "Empty teeth.bin", img: "covers/empty-teeth.jpg" },
+        { name: "Exile", file: "Exile.bin", img: "covers/exile.jpg" },
+        { name: "Exodus", file: "Exodus .bin", img: "covers/exodus.jpg" },
+        { name: "Ex-Ranza", file: "Ex-Ranza .bin", img: "covers/ex-ranza.jpg" },
+        { name: "Fantasia", file: "Fantasia.bin", img: "covers/fantasia.jpg" },
+        { name: "FIA Formula One Grand Prix Championship", file: "FIA Formula One Grand Prix Championshi...bin", img: "covers/fia-formula-one.jpg" },
+        { name: "Fighter Plane", file: "Fighter plane.smd", img: "covers/fighter-plane.jpg" },
+        { name: "Fire Shark", file: "Fire Shark.bin", img: "covers/fire-shark.jpg" },
+        { name: "Foreman For Real", file: "Foreman For Real .bin", img: "covers/foreman-for-real.jpg" },
+        { name: "Four Heavens King", file: "Four Heavens King.bin", img: "covers/four-heavens-king.jpg" },
+        { name: "Gambler Jiko Chuushinha", file: "Gambler Jiko Chuushinha - Katayama Ma...bin", img: "covers/gambler-jiko.jpg" },
+        { name: "General Chaos", file: "General Chaos.bin", img: "covers/general-chaos.jpg" },
+        { name: "Ghost Hunter", file: "Ghost Hunter .bin", img: "covers/ghost-hunter.jpg" },
+        { name: "Ghostbusters I", file: "Ghostbusters I.bin", img: "covers/ghostbusters-1.jpg" },
+        { name: "Ghostbusters", file: "Ghostbusters.bin", img: "covers/ghostbusters.jpg" },
+        { name: "Ghouls'n Ghosts", file: "Ghouls'n Ghost.bin", img: "covers/ghouls-n-ghosts.jpg" },
+        { name: "Golden Axe I", file: "Golden Axe I.bin", img: "covers/golden-axe-1.jpg" },
+        { name: "Golden Axe II", file: "Golden Axe II.bin", img: "covers/golden-axe-2.jpg" },
+        { name: "Heavy metal pinball", file: "Heavy metal pinball.bin", img: "covers/heavy-metal-pinball.jpg" },
+        { name: "High-powered pursuit vehicle", file: "High-powered pursuit vehicle.bin", img: "covers/high-powered-pursuit.jpg" },
+        { name: "Indiana Jones (Alt)", file: "Indiana Jones.bin", img: "covers/indiana-jones-alt.jpg" },
+        { name: "International chess", file: "International chess.bin", img: "covers/international-chess.jpg" },
+        { name: "Iron Fist of Wrath 1", file: "Iron Fist of Wrath 1.bin", img: "covers/iron-fist-wrath-1.jpg" },
+        { name: "Iron Fist of Wrath 2", file: "Iron Fist of Wrath 2.bin", img: "covers/iron-fist-wrath-2.jpg" },
+        { name: "Iron Fist of Wrath 3", file: "Iron Fist of Wrath 3.bin", img: "covers/iron-fist-wrath-3.jpg" },
+        { name: "Ixtus", file: "Ixtus.bin", img: "covers/ixtus.jpg" },
+        { name: "James Bond 007 (2)", file: "James Bond 007 (2).bin", img: "covers/james-bond-2.jpg" },
+        { name: "James Bond 007 (Alt)", file: "James Bond 007 .bin", img: "covers/james-bond-alt.jpg" },
+        { name: "James Bond 007", file: "James Bond 007.bin", img: "covers/james-bond.jpg" },
+        { name: "James Bond, 007", file: "James Bond, 007.bin", img: "covers/james-bond-comma.jpg" },
+        { name: "JuJu Legend", file: "JuJu Legend.bin", img: "covers/juju-legend.jpg" },
+        { name: "karate (Alt)", file: "karate.bin", img: "covers/karate-alt.jpg" },
+        { name: "Langrisser", file: "Langrisser.bin", img: "covers/langrisser.jpg" },
+        { name: "Leprechauns.-pop-up", file: "Leprechauns.-pop-up.bin", img: "covers/leprechauns-pop-up.jpg" },
+        { name: "Lock n Chase", file: "Lock n Chase .bin", img: "covers/lock-n-chase.jpg" },
+        { name: "Lungrisser", file: "Lungrisser.bin", img: "covers/lungrisser.jpg" },
+        { name: "Luxury gem cube", file: "Luxury gem cube.bin", img: "covers/luxury-gem-cube.jpg" },
+        { name: "Madou Monogatari", file: "Madou Monogatari.bin", img: "covers/madou-monogatari.jpg" },
+        { name: "Mahjong (2)", file: "Mahjong (2).bin", img: "covers/mahjong-2.jpg" },
+        { name: "Mahjong Dojo", file: "Mahjong Dojo.bin", img: "covers/mahjong-dojo.jpg" },
+        { name: "Mahjong", file: "Mahjong.bin", img: "covers/mahjong.jpg" },
+        { name: "MAPPY by NAMCO", file: "MAPPY by NAMCO.bin", img: "covers/mappy-namco.jpg" },
+        { name: "Mappy", file: "Mappy.bin", img: "covers/mappy.jpg" },
+        { name: "Marvel vs. Capcom - Clash of Super Heroes", file: "Marvel vs. Capcom - Clash of Super Hero...bin", img: "covers/marvel-vs-capcom.jpg" },
+        { name: "Master Ghostbusters", file: "Master Ghostbusters.bin", img: "covers/master-ghostbusters.jpg" },
+        { name: "Match remote control car", file: "Match remote control car.bin", img: "covers/match-remote-car.jpg" },
+        { name: "McDonald's Treasure Land Adventure", file: "McDonald_s Treasure Land Adventure .bin", img: "covers/mcdonalds-treasure-land.jpg" },
+        { name: "MD", file: "MD.smd", img: "covers/md.jpg" },
+        { name: "Mega Man 8 (track 1)", file: "mega man 8 (track 1).bin", img: "covers/mega-man-8.jpg" },
+        { name: "MegaTraX", file: "MegaTraX .bin", img: "covers/megatrax.jpg" },
+        { name: "METROID", file: "METROID .bin", img: "covers/metroid-caps.jpg" },
+        { name: "Metroid", file: "Metroid.bin", img: "covers/metroid.jpg" },
+        { name: "Michael Jackson's Moonwalker", file: "Michael Jackson_s Moonwalker .bin", img: "covers/michael-jackson-moonwalker.jpg" },
+        { name: "Mickey Mouse - World of Illusion", file: "Mickey Mouse - World of Illusion.bin", img: "covers/mickey-world-illusion.jpg" },
+        { name: "Mickey Mouse And Donald Duck", file: "Mickey Mouse And Donacdduck.bin", img: "covers/mickey-donald.jpg" },
+        { name: "Mickey Mouse and Donald Duck Adventure", file: "Mickey Mouse and Donald Duck Adventu...bin", img: "covers/mickey-donald-adventure.jpg" },
+        { name: "Mickey Mouse fantasy world", file: "Mickey Mouse fantasy world.bin", img: "covers/mickey-fantasy-world.jpg" },
+        { name: "Mickey Mouse Magic Castle Adventure", file: "Mickey Mouse Magic Castle Adventure.bin", img: "covers/mickey-magic-castle.jpg" },
+        { name: "Mickey Mouse Magic Castle Adventures (Alt)", file: "Mickey Mouse Magic Castle Adventures.b...bin", img: "covers/mickey-magic-castle-alt.jpg" },
+        { name: "Mickey Mouse.-fantasia", file: "Mickey mouse.-fantasia.bin", img: "covers/mickey-fantasia.jpg" },
+        { name: "Midnight CONTRA", file: "Midnight CONTRA.smd", img: "covers/midnight-contra.jpg" },
+        { name: "Military aircraft", file: "Military aircraft.smd", img: "covers/military-aircraft.jpg" },
+        { name: "Monaco GP II", file: "Monaco GP II.bin", img: "covers/monaco-gp-2-alt.jpg" },
+        { name: "Monopolist", file: "Monopolist.bin", img: "covers/monopolist.jpg" },
+        { name: "Monopoly", file: "Monopoly.bin", img: "covers/monopoly.jpg" },
+        { name: "Mr. Nutz (Alt)", file: "Mr. Nutz .bin", img: "covers/mr-nutz-alt.jpg" },
+        { name: "Mr. Nutz", file: "Mr. Nutz.bin", img: "covers/mr-nutz.jpg" },
+        { name: "Mustang", file: "Mustang.bin", img: "covers/mustang.jpg" },
+        { name: "Mystery Pyramid 2", file: "Mystery Pyramid 2.bin", img: "covers/mystery-pyramid-2.jpg" },
+        { name: "Neolution", file: "Neolution.smd", img: "covers/neolution.jpg" },
+        { name: "Ninja Frog", file: "Ninja Frog.bin", img: "covers/ninja-frog.jpg" },
+        { name: "Ninja revenge", file: "Ninja revenge.bin", img: "covers/ninja-revenge.jpg" },
+        { name: "Pac-man", file: "Pac-man.bin", img: "covers/pac-man.jpg" },
+        { name: "Pac-Mania", file: "Pac-Mania .bin", img: "covers/pac-mania.jpg" },
+        { name: "Pat Hot Basketball", file: "Pat Hot Basketball.bin", img: "covers/pat-hot-basketball.jpg" },
+        { name: "Pat Riley Basketball", file: "Pat Riley Basketball .bin", img: "covers/pat-riley-basketball.jpg" },
+        { name: "Peacock King 2", file: "Peacock King 2.bin", img: "covers/peacock-king-2.jpg" },
+        { name: "Phantasy Star Series 2", file: "Phantasy Star Series 2.bin", img: "covers/phantasy-star-2.jpg" },
+        { name: "Phelios", file: "Phelios .bin", img: "covers/phelios.jpg" },
+        { name: "Pokemon 1 (unofficial)", file: "Pokemon 1 (unofficial).smd", img: "covers/pokemon-1.jpg" },
+        { name: "Pokemon 2 (unofficial)", file: "Pokemon 2 (unofficial).smd", img: "covers/pokemon-2.jpg" },
+        { name: "Pokemon-Crazy Drummer Pikachu", file: "Pokemon-Crazy Drummer Pikachu.bin", img: "covers/pokemon-crazy-pikachu.jpg" },
+        { name: "Predator 2", file: "Predator 2.bin", img: "covers/predator-2.jpg" },
+        { name: "Pulse Superman (Alt)", file: "Pulse Superman.bin", img: "covers/pulse-superman-alt.jpg" },
+        { name: "Pulseman", file: "Pulseman.bin", img: "covers/pulseman.jpg" },
+        { name: "Punisher", file: "Punisher.bin", img: "covers/punisher.jpg" },
+        { name: "Pyramid Magic 2", file: "Pyramid Magic 2 .bin", img: "covers/pyramid-magic-2.jpg" },
+        { name: "Raiders", file: "Raiders.bin", img: "covers/raiders.jpg" },
+        { name: "Rainbow Island", file: "Rainbow Island.bin", img: "covers/rainbow-island.jpg" },
+        { name: "Real boxing", file: "Real boxing.bin", img: "covers/real-boxing.jpg" },
+        { name: "Revenge of Shinobi", file: "Revenge of Shinobi .bin", img: "covers/revenge-of-shinobi.jpg" },
+        { name: "RoboCop", file: "RoboCop.bin", img: "covers/robocop.jpg" },
+        { name: "Rocket Knight (Alt)", file: "Rocket Knight.bin", img: "covers/rocket-knight-alt.jpg" },
+        { name: "Sangokushi 3", file: "Sangokushi 3.bin", img: "covers/sangokushi-3.jpg" },
+        { name: "Shadow Blasters", file: "Shadow Blasters .bin", img: "covers/shadow-blasters.jpg" },
+        { name: "Shadow Dancer - The Secret of Shinobi", file: "Shadow Dancer - The Secret of Shinobi ....bin", img: "covers/shadow-dancer.jpg" },
+        { name: "Shining Force 1- Clash of the heritage", file: "Shining Force 1- Clash of the heritage.smd", img: "covers/shining-force-1.jpg" },
+        { name: "Shuangjielong 2-revenge", file: "Shuangjielong 2-revenge.bin", img: "covers/shuangjielong-2.jpg" },
+        { name: "Skeleton Fighter (Alt)", file: "Skeleton Fighter.bin", img: "covers/skeleton-fighter-alt.jpg" },
+        { name: "Slam Dunk Kyougou Makkou Taiketsu", file: "Slam Dunk Kyougou Makkou Taiketsu.smd", img: "covers/slam-dunk-kyougou.jpg" },
+        { name: "Snake (Alt)", file: "Snake .bin", img: "covers/snake-alt.jpg" },
+        { name: "Snake", file: "Snake.bin", img: "covers/snake.jpg" },
+        { name: "Snow Bros", file: "Snow Bros .bin", img: "covers/snow-bros.jpg" },
+        { name: "Solitaire", file: "Solitaire.bin", img: "covers/solitaire.jpg" },
+        { name: "Sonic 3D Blast (Alt)", file: "Sonic 3D Blast .bin", img: "covers/sonic-3d-blast-alt.jpg" },
+        { name: "Sonic 3D Blast", file: "Sonic 3D Blast.bin", img: "covers/sonic-3d-blast.jpg" },
+        { name: "Sonic kid.-Sonic the Hedgehog 2", file: "Sonic kid.-Sonic the Hedgehog 2.bin", img: "covers/sonic-kid-2.jpg" },
+        { name: "Sonic kid.-Sonic the Hedgehog 3", file: "Sonic kid.-Sonic the Hedgehog 3.bin", img: "covers/sonic-kid-3.jpg" },
+        { name: "Sonic kid.-Sonic the HEDGEHOG and co 1", file: "Sonic kid.-Sonic the HEDGEHOG and co...bin", img: "covers/sonic-kid-co1.jpg" },
+        { name: "Sonic kid.-Sonic the HEDGEHOG and co 2", file: "Sonic kid.-Sonic the HEDGEHOG and co...bin", img: "covers/sonic-kid-co2.jpg" },
+        { name: "Sonic Kid-amy Roth", file: "Sonic Kid-amy Roth.bin", img: "covers/sonic-kid-amy-roth.jpg" },
+        { name: "Sonic the Hedgehog -Amy Rose", file: "Sonic the Hedgehog -Amy Rose .bin", img: "covers/sonic-amy-rose.jpg" },
+        { name: "Sonic the Hedgehog -Sonic the Hedgehog", file: "Sonic the Hedgehog -Sonic the Hedgeho...bin", img: "covers/sonic-the-hedgehog-alt.jpg" },
+        { name: "Sonic the Hedgehog (Alt)", file: "Sonic the Hedgehog.bin", img: "covers/sonic-the-hedgehog.jpg" },
+        { name: "Sonic the Hedgehog-Sonic and partners 1", file: "Sonic the Hedgehog-Sonic and partners ...bin", img: "covers/sonic-partners-1.jpg" },
+        { name: "Sonic the Hedgehog-Sonic and partners 2", file: "Sonic the Hedgehog-Sonic and partners ...bin", img: "covers/sonic-partners-2.jpg" },
+        { name: "Sonic the Hedgehog-Sonic the Hedgehog", file: "Sonic the Hedgehog-Sonic the Hedgeho...bin", img: "covers/sonic-hedgehog-double.jpg" },
+        { name: "Space warriors.-magic warriors", file: "Space warriors.-magic warriors.smd", img: "covers/space-warriors.jpg" },
+        { name: "Spider-Man (Alt)", file: "Spider-Man .bin", img: "covers/spider-man-alt.jpg" },
+        { name: "Spiderman and the psychic group", file: "Spiderman and the psychic group.bin", img: "covers/spiderman-psychic-group.jpg" },
+        { name: "Spider-Man and the X-Men", file: "Spider-Man and the X-Men .bin", img: "covers/spiderman-xmen.jpg" },
+        { name: "Spiderman vs behind the scenes", file: "Spiderman vs behind the scenes.bin", img: "covers/spiderman-behind-scenes.jpg" },
+        { name: "Spider-Man vs The Kingpin", file: "Spider-Man vs The Kingpin .bin", img: "covers/spiderman-kingpin.jpg" },
+        { name: "Spiderman", file: "Spiderman.bin", img: "covers/spiderman.jpg" },
+        { name: "Squirrel Battle (Alt)", file: "Squirrel Battle.bin", img: "covers/squirrel-battle-alt.jpg" },
+        { name: "Street Fight", file: "Street Fight.bin", img: "covers/street-fight.jpg" },
+        { name: "Streets of Rage 1", file: "Streets of Rage 1.bin", img: "covers/streets-of-rage-1.jpg" },
+        { name: "Streets of Rage 2", file: "Streets of Rage 2.bin", img: "covers/streets-of-rage-2.jpg" },
+        { name: "Streets of Rage 3", file: "Streets of Rage 3.bin", img: "covers/streets-of-rage-3.jpg" },
+        { name: "Super Basketball", file: "Super Basketball.bin", img: "covers/super-basketball.jpg" },
+        { name: "Super Mario RPG - Legend of the Seven Stars", file: "Super Mario RPG - Legend of the Seven S...smc", img: "covers/super-mario-rpg.jpg" },
+        { name: "Super Monaco Racing", file: "Super Monaco Racing.bin", img: "covers/super-monaco-racing.jpg" },
+        { name: "Super Volleyball", file: "Super Volleyball.bin", img: "covers/super-volleyball.jpg" },
+        { name: "Superbike", file: "Superbike.bin", img: "covers/superbike.jpg" },
+        { name: "Taiko Risshiden (Alt)", file: "Taiko Risshiden.bin", img: "covers/taiko-risshiden-alt.jpg" },
+        { name: "Taikou Risshiden", file: "Taikou Risshiden .bin", img: "covers/taikou-risshiden.jpg" },
+        { name: "Tekken 3 (Track 2)", file: "Tekken 3 (Track 2).bin", img: "covers/tekken-3-track2.jpg" },
+        { name: "Tekken 3 (Track 3)", file: "Tekken 3 (Track 3).bin", img: "covers/tekken-3-track3.jpg" },
+        { name: "Terminator", file: "Terminator .bin", img: "covers/terminator.jpg" },
+        { name: "The Adventures of Uncle McDonald's", file: "The Adventures of Uncle McDonald's.bin", img: "covers/uncle-mcdonald.jpg" },
+        { name: "The burning spirit", file: "The burning spirit.bin", img: "covers/the-burning-spirit.jpg" },
+        { name: "The dark castle", file: "The dark castle.bin", img: "covers/the-dark-castle.jpg" },
+        { name: "The go-kart Challenge", file: "The go-kart Challenge.bin", img: "covers/go-kart-challenge.jpg" },
+        { name: "The Jungle Book (2)", file: "The Jungle Book (2).bin", img: "covers/jungle-book-2.jpg" },
+        { name: "The Jungle Book", file: "The Jungle Book.bin", img: "covers/jungle-book.jpg" },
+        { name: "The Legend of Kadasu", file: "The Legend of Kadasu.bin", img: "covers/legend-of-kadasu.jpg" },
+        { name: "The legend of Yinger", file: "The legend of Yinger.bin", img: "covers/legend-of-yinger.jpg" },
+        { name: "The Lost World (Alt)", file: "The Lost World .bin", img: "covers/the-lost-world-alt.jpg" },
+        { name: "The Lost World", file: "The Lost World.bin", img: "covers/the-lost-world.jpg" },
+        { name: "The man of the universe", file: "The man of the universe.smd", img: "covers/man-of-universe.jpg" },
+        { name: "The Ninja Frog and the Dragon", file: "The Ninja Frog and the Dragon.bin", img: "covers/ninja-frog-dragon.jpg" },
+        { name: "The polar tiger", file: "The polar tiger.bin", img: "covers/polar-tiger.jpg" },
+        { name: "The Revenge of Shinobi 1", file: "The Revenge of Shinobi 1.bin", img: "covers/revenge-shinobi-1.jpg" },
+        { name: "The Revenge of Shinobi 2", file: "The Revenge of Shinobi 2.bin", img: "covers/revenge-shinobi-2.jpg" },
+        { name: "The Revenge of Shinobi 3", file: "The Revenge of Shinobi 3.bin", img: "covers/revenge-shinobi-3.jpg" },
+        { name: "The shadow warrior.-the secret of the Ninja", file: "The shadow warrior.-the secret of the Nin...bin", img: "covers/shadow-warrior-ninja.jpg" },
+        { name: "The Snow Mountain brothers", file: "The Snow Mountain brothers.bin", img: "covers/snow-mountain-brothers.jpg" },
+        { name: "THE STREET FIGHTERS", file: "THE STREET FIGHTERS.bin", img: "covers/the-street-fighters.jpg" },
+        { name: "The tale of the wizard", file: "The tale of the wizard.bin", img: "covers/tale-of-wizard.jpg" },
+        { name: "The Terminator", file: "The Terminator.bin", img: "covers/the-terminator.jpg" },
+        { name: "The White Book of the retreat-the Great", file: "The White Book of the retreat-the Great ...smd", img: "covers/white-book-retreat.jpg" },
+        { name: "The winged warrior (Alt)", file: "The winged warrior.bin", img: "covers/winged-warrior-alt.jpg" },
+        { name: "The Young Indiana Jones Chronicles", file: "The Young Indiana Jones Chronicles.bin", img: "covers/young-indiana-jones.jpg" },
+        { name: "Thunder and lightning", file: "Thunder and lightning.smd", img: "covers/thunder-and-lightning.jpg" },
+        { name: "Thunder Force Fighter 3", file: "Thunder Force Fighter 3.bin", img: "covers/thunder-force-3.jpg" },
+        { name: "Tinhead", file: "Tinhead.bin", img: "covers/tinhead.jpg" },
+        { name: "Tomahawk I", file: "Tomahawk I.bin", img: "covers/tomahawk-1.jpg" },
+        { name: "Tomahawk II", file: "Tomahawk II.bin", img: "covers/tomahawk-2.jpg" },
+        { name: "Turbo Outrun(Mega-Tech)", file: "Turbo Outrun(Mega-Tech).bin", img: "covers/turbo-outrun.jpg" },
+        { name: "Twinhawk", file: "Twinhawk.smd", img: "covers/twinhawk.jpg" },
+        { name: "Ultimate war zone", file: "Ultimate war zone.bin", img: "covers/ultimate-war-zone.jpg" },
+        { name: "Unconquered", file: "Unconquered.bin", img: "covers/unconquered.jpg" },
+        { name: "US AAF MUSTANG", file: "US AAF MUSTANG .bin", img: "covers/us-aaf-mustang.jpg" },
+        { name: "V.R Fighter vs Taken 2", file: "V.R Fighter vs Taken 2.bin", img: "covers/vr-fighter-vs-taken-2.jpg" },
+        { name: "Venom (Alt)", file: "Venom.bin", img: "covers/venom-alt.jpg" },
+        { name: "Violent Motorcycle 1", file: "Violent Motorcycle 1.bin", img: "covers/violent-motorcycle-1.jpg" },
+        { name: "Violent Motorcycle 2", file: "Violent Motorcycle 2.bin", img: "covers/violent-motorcycle-2.jpg" },
+        { name: "Violent Nemesis (Alt)", file: "Violent Nemesis.bin", img: "covers/violent-nemesis-alt.jpg" },
+        { name: "Warehouse Fan (Alt)", file: "Warehouse Fan.bin", img: "covers/warehouse-fan-alt.jpg" },
+        { name: "Water margin", file: "Water margin.smd", img: "covers/water-margin.jpg" },
+        { name: "Western cowboy", file: "Western cowboy.smd", img: "covers/western-cowboy.jpg" },
+        { name: "WWF Super WrestleMania", file: "WWF Super WrestleMania.bin", img: "covers/wwf-super-wrestlemania.jpg" },
+        { name: "X-man", file: "X-man.bin", img: "covers/x-man.jpg" },
+        { name: "Yang Jiajiang", file: "Yang Jiajiang.bin", img: "covers/yang-jiajiang.jpg" },
+        { name: "Zephyr 1", file: "Zephyr 1.bin", img: "covers/zephyr-1.jpg" },
+        { name: "Zephyr 2", file: "Zephyr 2.bin", img: "covers/zephyr-2.jpg" },
+        { name: "Zero Wind Fighter", file: "Zero Wind Fighter.smd", img: "covers/zero-wind-fighter.jpg" }
+    ];
+
+    function renderGames(list) {
+        const grid = document.getElementById('gameGrid');
+        grid.innerHTML = '';
+
+        if (list.length === 0) {
+            grid.innerHTML = '<div class="no-results">Игры не найдены</div>';
+            return;
+        }
+
+        list.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            
+            const playUrl = `player.html?game=${encodeURIComponent(game.file)}`;
+
+            card.innerHTML = `
+                <img src="${game.img}" alt="${game.name}" class="game-cover" onerror="this.src='https://via.placeholder.com/220x180/18181b/8d8d99?text=No+Cover'">
+                <div class="game-details">
+                    <span class="game-title">${game.name}</span>
+                    <a href="${playUrl}" class="play-btn">Играть</a>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filtered = games.filter(game => 
+            game.name.toLowerCase().includes(searchTerm) || 
+            game.file.toLowerCase().includes(searchTerm)
+        );
+        renderGames(filtered);
+    });
+
+    renderGames(games);
+</script>
+
+</body>
+</html>
