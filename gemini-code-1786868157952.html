@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Player</title>
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #game { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+
+  <script>
+    // Получаем имя файла игры из URL (например, ?game=game.bin&core=sega)
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameFile = urlParams.get('game');
+    const systemCore = urlParams.get('core') || 'segaMD'; // Ядро по умолчанию
+
+    EJS_player = '#game';
+    EJS_core = systemCore; 
+    EJS_gameUrl = gameFile; // Путь к файлу .bin
+    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+  </script>
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+</body>
+</html>
