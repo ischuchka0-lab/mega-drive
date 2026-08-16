@@ -554,25 +554,47 @@
             return;
         }
 
+        const fragment = document.createDocumentFragment();
+
         list.forEach(game => {
             const card = document.createElement('div');
             card.className = 'game-card';
             
             const playUrl = `player.html?game=${encodeURIComponent(game.file)}`;
 
-            card.innerHTML = `
-                <img src="${game.img}" alt="${game.name}" class="game-cover" onerror="this.src='https://via.placeholder.com/220x180/18181b/8d8d99?text=No+Cover'">
-                <div class="game-details">
-                    <span class="game-title">${game.name}</span>
-                    <a href="${playUrl}" class="play-btn">Играть</a>
-                </div>
-            `;
-            grid.appendChild(card);
+            const img = document.createElement('img');
+            img.className = 'game-cover';
+            img.alt = game.name;
+            img.src = game.img;
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="180" viewBox="0 0 220 180"><rect width="220" height="180" fill="%2318181b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%238d8d99" font-family="sans-serif" font-size="14">No Cover</text></svg>';
+            };
+
+            const details = document.createElement('div');
+            details.className = 'game-details';
+
+            const title = document.createElement('span');
+            title.className = 'game-title';
+            title.textContent = game.name;
+
+            const btn = document.createElement('a');
+            btn.className = 'play-btn';
+            btn.href = playUrl;
+            btn.textContent = 'Играть';
+
+            details.appendChild(title);
+            details.appendChild(btn);
+            card.appendChild(img);
+            card.appendChild(details);
+
+            fragment.appendChild(card);
         });
+
+        grid.appendChild(fragment);
     }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
+        const searchTerm = e.target.value.toLowerCase().trim();
         const filtered = games.filter(game => 
             game.name.toLowerCase().includes(searchTerm) || 
             game.file.toLowerCase().includes(searchTerm)
@@ -585,3 +607,4 @@
 
 </body>
 </html>
+  
